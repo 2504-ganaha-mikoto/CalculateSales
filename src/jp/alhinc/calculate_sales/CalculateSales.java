@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CalculateSales {
@@ -26,21 +28,58 @@ public class CalculateSales {
 	 * @param コマンドライン引数
 	 */
 	public static void main(String[] args) {
+
+
 		// 支店コードと支店名を保持するMap
 		Map<String, String> branchNames = new HashMap<>();
 		// 支店コードと売上金額を保持するMap
 		Map<String, Long> branchSales = new HashMap<>();
 
 		// 支店定義ファイル読み込み処理
+//		質問呼び出し方がわからない
 		if (!readFile(args[0], FILE_NAME_BRANCH_LST, branchNames, branchSales)) {
 			return;
 		}
 
 		// ※ここから集計処理を作成してください。(処理内容2-1、2-2)
+		//		\\にしないとエラーなる
+		File[] files = new File("C:\\Users\\trainee1332\\Desktop\\売上集計課題").listFiles();
+
+		List<File> rcdFiles = new ArrayList<>();
+
+		for (int i = 0; i < files.length; i++) {
+			if (rcdFiles.get(i).getName().matches("^[0-9]{8}[.]+rcd$")) {
+				//正規表現要動作確認
+				//売上ファイルの条件に当てはまったものだけ、List(ArrayList) に追加します。
+				rcdFiles.add(files[i]);
+			}
+			}
 
 
-		// 支店別集計ファイル書き込み処理
-		if (!writeFile(args[0], FILE_NAME_BRANCH_OUT, branchNames, branchSales)) {
+			BufferedReader br = null;
+			for (int j = 0; j < rcdFiles.size(); j++) {
+			try {
+				FileReader fr = new FileReader(rcdFiles.get(j));
+				br = new BufferedReader(fr);
+
+				String line;
+				// 一行ずつ読み込む
+				while ((line = br.readLine()) != null) {
+
+
+				}
+
+			} catch (IOException e) {
+				System.out.println(UNKNOWN_ERROR);
+			}
+				}
+			}
+
+			}
+		}
+
+	// 支店別集計ファイル書き込み処理
+	if(!writeFile(args[0], FILE_NAME_BRANCH_OUT, branchNames, branchSales)) {
 			return;
 		}
 
