@@ -1,8 +1,10 @@
 package jp.alhinc.calculate_sales;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,57 +31,80 @@ public class CalculateSales {
 	 */
 	public static void main(String[] args) {
 
-
 		// 支店コードと支店名を保持するMap
 		Map<String, String> branchNames = new HashMap<>();
 		// 支店コードと売上金額を保持するMap
 		Map<String, Long> branchSales = new HashMap<>();
 
 		// 支店定義ファイル読み込み処理
-//		質問呼び出し方がわからない
+		//		質問呼び出し方がわからない
 		if (!readFile(args[0], FILE_NAME_BRANCH_LST, branchNames, branchSales)) {
 			return;
 		}
 
 		// ※ここから集計処理を作成してください。(処理内容2-1、2-2)
-		//		\\にしないとエラーなる
-		File[] files = new File("C:\\Users\\trainee1332\\Desktop\\売上集計課題").listFiles();
-
+		File[] files = new File(args[0]).listFiles();
+		//		売上ファイルを格納するため宣言
 		List<File> rcdFiles = new ArrayList<>();
 
 		for (int i = 0; i < files.length; i++) {
-			if (rcdFiles.get(i).getName().matches("^[0-9]{8}[.]+rcd$")) {
-				//正規表現要動作確認
-				//売上ファイルの条件に当てはまったものだけ、List(ArrayList) に追加します。
+			//正規表現要動作確認
+			//売上ファイルの条件あうもののみ、List(ArrayList) に追加。
+			if (files[i].getName().matches("^[0-9]{8}[.]+rcd$")) {
 				rcdFiles.add(files[i]);
-			}
-			}
-
-
-			BufferedReader br = null;
-			for (int j = 0; j < rcdFiles.size(); j++) {
-			try {
-				FileReader fr = new FileReader(rcdFiles.get(j));
-				br = new BufferedReader(fr);
-
-				String line;
-				// 一行ずつ読み込む
-				while ((line = br.readLine()) != null) {
-
-
-				}
-
-			} catch (IOException e) {
-				System.out.println(UNKNOWN_ERROR);
-			}
-				}
-			}
-
 			}
 		}
 
-	// 支店別集計ファイル書き込み処理
-	if(!writeFile(args[0], FILE_NAME_BRANCH_OUT, branchNames, branchSales)) {
+		BufferedReader br = null;
+		//rcdFilesに複数の売上ファイルの情報を格納しているので、その数だけ繰り返します。
+		//String fileName =rcdFiles.get(i).getName();でファイル名を取得できる
+		for (int i = 0; i < rcdFiles.size(); i++) {
+			String fileName = rcdFiles.get(i).getName();
+		//判別したファイルをfilereaderへ→bufferに移動して保持
+		try {
+
+			File saleList = new File(args[0]);
+			FileReader fr = new FileReader(saleList);
+			br = new BufferedReader(fr);
+
+			//売り上げリストの名前を新たに宣言
+			String salseline = br.readLine();
+			//売上ファイルの1行目には支店コード、2行目には売上金額が入っています。
+			//売上ファイルの区切り
+			String salesLists[] = salseline.split(" ");
+
+
+
+
+			//売上ファイルから読み込んだ売上金額をMapに加算していくために、型の変換を行います。
+			long salseValue = Long.parseLong(salesLists[1]);
+			//読み込んだ売上金額を加算します。
+			//Map(HashMap)から値を取得する.salesLists[0]は支店コード。salseValueは売上金額をキャストしたもの
+			Long saleSum = branchSales.get(salesLists[0]) + salseValue;
+
+			//加算した売上金額をMapに追加します。salesLists[0]は支店コード。saleSumは加算した金額。
+			branchSales.put(salesLists[0], saleSum);
+			System.out.printf(salesLists[0], saleSum);
+
+		} catch (IOException e) {
+			System.out.println(UNKNOWN_ERROR);
+
+		} finally {
+			// ファイルを開いている場合
+			if (br != null) {
+				// ファイルを閉じる
+				try {
+					br.close();
+				} catch (IOException e) {
+					// TODO 自動生成された catch ブロック
+					e.printStackTrace();
+				}
+			}
+
+		}
+		}
+		// 支店別集計ファイル書き込み処理
+		if (!writeFile(args[0], FILE_NAME_BRANCH_OUT, branchNames, branchSales)) {
 			return;
 		}
 
@@ -145,8 +170,36 @@ public class CalculateSales {
 	private static boolean writeFile(String path, String fileName, Map<String, String> branchNames,
 			Map<String, Long> branchSales) {
 		// ※ここに書き込み処理を作成してください。(処理内容3-1)
+		BufferedWriter bw = null;
+		try {
+			File file = new File(path, fileName);
+			FileWriter fw = new FileWriter(file);
+			bw = new BufferedWriter(fw);
+			for (String key : branchNames.keySet()) {
+				//keyという変数には、Mapから取得したキーが代入されています。
+				//拡張for文で繰り返されているので、1つ目のキーが取得できたら、
+				//2つ⽬の取得...といったように、次々とkeyという変数に上書きされていきます。
+				String line;
+				bw.write(key + "," + branchNames.get(key) + "," + branchSales.get(key));
+				bw.newLine();
+				System.out.println(key + "," + branchNames.get(key) + "," + branchSales.get(key));
+			}
 
+		} catch (IOException e) {
+			System.out.println(UNKNOWN_ERROR);
+			return false;
+		} finally {
+			// ファイルを開いている場合
+			if (bw != null) {
+				try {
+					// ファイルを閉じる
+					bw.close();
+				} catch (IOException e) {
+					System.out.println(UNKNOWN_ERROR);
+					return false;
+				}
+			}
+		}
 		return true;
 	}
-
 }
