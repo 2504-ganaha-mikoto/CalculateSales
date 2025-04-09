@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,11 +53,30 @@ public class CalculateSales {
 		for (int i = 0; i < files.length; i++) {
 			//files[i].getName() でファイル名が取得できます
 			String fileName = files[i].getName();
-			//正規表現要動作確認
 			//売上ファイルの条件あうもののみ、List(ArrayList) に追加。
 			if (fileName.matches("^[0-9]{8}[.]rcd$")) {
 				rcdFiles.add(files[i]);
+
 			}
+
+//			エラー処理　ファイルの連番
+			Collections.sort(rcdFiles);
+			for(int j = 0; j < rcdFiles.size() - 1; j++) {
+				int former = Integer.parseInt(rcdFiles.get(i).getName().substring(0, 8));
+				int latter = Integer.parseInt(rcdFiles.get(i + 1).getName().substring(0, 8));
+
+			      //比較する2つのファイル名の先頭から数字の8文字を切り出し、int型に変換します。
+				if((latter - former) != 1) {
+
+					//2つのファイル名の数字を比較して、差が1ではなかったら、
+					//エラーメッセージをコンソールに表示します。
+					System.out.println("売上ファイル名が連番になっていません");
+					return;
+				}
+			}
+
+
+
 		}
 
 		BufferedReader br = null;
@@ -81,18 +101,26 @@ public class CalculateSales {
 					String code = salseLine.get(0);
 					String value = salseLine.get(1);
 
+					if (!branchNames.containsKey(code)) {
+					    //⽀店情報を保持しているMapに売上ファイルの⽀店コードが存在しなかった場合は、
+					    //エラーメッセージをコンソールに表⽰します。
+					}
+
 					//売上ファイルから読み込んだ売上金額をMapに加算していくために、型の変換を行います。
 					long salseValue = Long.parseLong(value);
 					//読み込んだ売上金額を加算します。
 					//Map(HashMap)から値を取得する.salesLists[0]は支店コード。salseValueは売上金額をキャストしたもの
 					Long saleSum = branchSales.get(code) + salseValue;
 
+//					エラー処理　売上金額の桁制限
+					if(saleSum >= 10000000000L){
+						System.out.println("合計⾦額が10桁を超えました");
+						return;
+					}
+
+
 					//加算した売上金額をMapに追加します。salesLists[0]は支店コード。saleSumは加算した金額。
 					branchSales.put(code, saleSum);
-
-
-
-
 
 
 			} catch (IOException e) {
@@ -134,6 +162,15 @@ public class CalculateSales {
 
 		try {
 			File file = new File(path, fileName);
+
+//			エラー処理　ファイルがない例外
+			if(!file.exists()){
+				System.out.println("支店定義ファイルが存在しません");
+				return false;
+			}
+
+
+
 			FileReader fr = new FileReader(file);
 			br = new BufferedReader(fr);
 
@@ -142,6 +179,14 @@ public class CalculateSales {
 			while ((line = br.readLine()) != null) {
 				// カンマを基に文字列を分割する
 				String[] storeName = line.split(",");
+
+
+//				エラー処理　ファイルがフォーマットではない例外
+				if(!line.matches(",")){
+					System.out.println("支店定義ファイルのフォーマットが不正です");
+					return false;
+				}
+
 				//区切った文字を支店名ハッシュマップに保存していく
 				branchNames.put(storeName[0], storeName[1]);
 				//支店名だけ入れた売上のハッシュマップをいれて固定値の０円を入れている
