@@ -26,7 +26,7 @@ public class CalculateSales {
 	private static final String FILE_INVALID_FORMAT = "支店定義ファイルのフォーマットが不正です";
 	private static final String FILE_INVALID_SEQUECE = "売上ファイル名が連番になっていません";
 	private static final String AMOUNT_OVER = "合計金額が10桁を超えました";
-	private static final String SHOPCODE_INVALID = "の支店コードが不正です";
+	private static final String BRANCH_CODE_INVALID = "の支店コードが不正です";
 	private static final String SALESFILE_INVALID_FORMAT = "のフォーマットが不正です";
 
 	/**
@@ -114,7 +114,7 @@ public class CalculateSales {
 				}
 				//エラー処理2-3 売上ファイルの支店コードが支店定義ファイルに存在するか
 				if (!branchNames.containsKey(branchCode)) {
-					System.out.println(fileInfo.getName() + SHOPCODE_INVALID);
+					System.out.println(fileInfo.getName() + BRANCH_CODE_INVALID);
 					return;
 				}
 				///エラー処理3-2　売上金額が数字かどうか確認
@@ -128,8 +128,6 @@ public class CalculateSales {
 				long intValue = Long.parseLong(salseList.get(1));
 				//読み込んだ売上金額を加算します。brunchCodeは支店コード。
 				Long saleSum = branchSales.get(branchCode) + intValue;
-				//加算した売上金額をMapに追加します。salesLists[0]は支店コード。saleSumは加算した金額。
-				branchSales.put(branchCode, saleSum);
 
 				//エラー処理2-2　売上⾦額の合計が10桁を超えたか確認
 				if (saleSum >= 10000000000L) {
@@ -137,6 +135,8 @@ public class CalculateSales {
 					return;
 				}
 
+				//加算した売上金額をMapに追加します。salesLists[0]は支店コード。saleSumは加算した金額。
+				branchSales.put(branchCode, saleSum);
 			} catch (IOException e) {
 				System.out.println(UNKNOWN_ERROR);
 				return;
