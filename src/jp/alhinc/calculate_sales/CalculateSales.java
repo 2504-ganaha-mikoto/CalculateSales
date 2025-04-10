@@ -105,7 +105,7 @@ public class CalculateSales {
 					salseList.add(line);
 				}
 				//売上ファイルの支店コードを格納
-				String brunchCode = salseList.get(0);
+				String branchCode = salseList.get(0);
 
 				//エラー処理2-4　売上ファイルの中身が２行かどうかを確認
 				if (salseList.size() != 2) {
@@ -113,12 +113,12 @@ public class CalculateSales {
 					return;
 				}
 				//エラー処理2-3 売上ファイルの支店コードが支店定義ファイルに存在するか
-				if (!branchNames.containsKey(brunchCode)) {
+				if (!branchNames.containsKey(branchCode)) {
 					System.out.println(fileInfo.getName() + SHOPCODE_INVALID);
 					return;
 				}
 				///エラー処理3-2　売上金額が数字かどうか確認
-				String saleValue = String.valueOf((branchSales.get(brunchCode)));
+				String saleValue = String.valueOf((branchSales.get(branchCode)));
 				if (!saleValue.matches("^[0-9]*$")) {
 					System.out.println(UNKNOWN_ERROR);
 					return;
@@ -127,9 +127,9 @@ public class CalculateSales {
 				//売上ファイルから読み込んだ売上金額をMapに加算していくために、型の変換を行います。
 				long intValue = Long.parseLong(salseList.get(1));
 				//読み込んだ売上金額を加算します。brunchCodeは支店コード。
-				Long saleSum = branchSales.get(brunchCode) + intValue;
+				Long saleSum = branchSales.get(branchCode) + intValue;
 				//加算した売上金額をMapに追加します。salesLists[0]は支店コード。saleSumは加算した金額。
-				branchSales.put(brunchCode, saleSum);
+				branchSales.put(branchCode, saleSum);
 
 				//エラー処理2-2　売上⾦額の合計が10桁を超えたか確認
 				if (saleSum >= 10000000000L) {
