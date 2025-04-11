@@ -31,9 +31,11 @@ public class CalculateSales {
 	private static final String FILE_NOT_EXIST = "定義ファイルが存在しません";
 	private static final String FILE_INVALID_FORMAT = "定義ファイルのフォーマットが不正です";
 	private static final String FILE_INVALID_SEQUECE = "売上ファイル名が連番になっていません";
-	private static final String PROPERTY_CODE_INVALID = "コードが不正です";
+	private static final String BRANCH_CODE_INVALID = "の支店コードが不正です";
+	private static final String COMMODITY_CODE_INVALID = "の商品コードが不正です";
 	private static final String AMOUNT_OVER = "合計金額が10桁を超えました";
 	private static final String SALESFILE_INVALID_FORMAT = "のフォーマットが不正です";
+
 
 	/**
 	 * メインメソッド
@@ -138,15 +140,15 @@ public class CalculateSales {
 				}
 				//エラー処理2-3 売上ファイルの支店コードが支店定義ファイルに存在するか
 				if (!branchNames.containsKey(branchCode)) {
-					System.out.println(fileInfo.getName() + "の" + branch + PROPERTY_CODE_INVALID);
+					System.out.println(fileInfo.getName() + BRANCH_CODE_INVALID);
 					return;
 				}
 				if (!commodityNames.containsKey(commodityCode)) {
-					System.out.println(fileInfo.getName() + "の" + commodity + PROPERTY_CODE_INVALID);
+					System.out.println(fileInfo.getName() + COMMODITY_CODE_INVALID);
 					return;
 				}
 				///エラー処理3-2　売上金額が数字かどうか確認
-				String saleValue = String.valueOf((branchSales.get(branchCode)));
+				String saleValue = String.valueOf((salseList.get(2)));
 				if (!saleValue.matches("^[0-9]*$")) {
 					System.out.println(UNKNOWN_ERROR);
 					return;
@@ -156,15 +158,11 @@ public class CalculateSales {
 				long intValue = Long.parseLong(salseList.get(2));
 				//読み込んだ売上金額を加算します。brunchCodeは支店コード。commodityCodeは商品コード。
 				Long saleSum = branchSales.get(branchCode) + intValue;
-				Long commoritysaleSum = branchSales.get(branchCode) + intValue;
+				Long commoritySaleSum = branchSales.get(branchCode) + intValue;
 
 				//エラー処理2-2　売上⾦額の合計が10桁を超えたか確認
-				if (saleSum >= 10000000000L) {
-					System.out.println(branch + "別の" + AMOUNT_OVER);
-					return;
-				}
-				if (commoritysaleSum >= 10000000000L) {
-					System.out.println(commodity + "別の" + AMOUNT_OVER);
+				if (saleSum >= 10000000000L ||commoritySaleSum >= 10000000000L) {
+					System.out.println(AMOUNT_OVER);
 					return;
 				}
 
@@ -208,8 +206,8 @@ public class CalculateSales {
 	 * @param 支店コードと売上金額を保持するMap
 	 * @return 読み込み可否
 	 */
-	private static boolean readFile(String path, String fileName, Map<String, String> Names,
-			Map<String, Long> Sales, String Regexp, String property) {
+	private static boolean readFile(String path, String fileName, Map<String, String> names,
+			Map<String, Long> sales, String regexp, String property) {
 		BufferedReader br = null;
 
 		try {
@@ -230,14 +228,14 @@ public class CalculateSales {
 				// カンマを基に文字列を分割する
 				String[] codeName = line.split(",");
 				//エラー処理1-2　ファイルがフォーマットではない例外
-				if ((codeName.length != 2) || (!codeName[0].matches(Regexp))) {
+				if ((codeName.length != 2) || (!codeName[0].matches(regexp))) {
 					System.out.println(property + FILE_INVALID_FORMAT);
 					return false;
 				}
 				//区切った文字を支店名ハッシュマップに保存していく
-				Names.put(codeName[0], codeName[1]);
+				names.put(codeName[0], codeName[1]);
 				//支店名だけ入れた売上のハッシュマップをいれて固定値の０円を入れている
-				Sales.put(codeName[0], 0L);
+				sales.put(codeName[0], 0L);
 			}
 
 		} catch (IOException e) {
@@ -267,8 +265,8 @@ public class CalculateSales {
 	 * @param 支店コードと売上金額を保持するMap
 	 * @return 書き込み可否
 	 */
-	private static boolean writeFile(String path, String fileName, Map<String, String> Names,
-			Map<String, Long> Sales) {
+	private static boolean writeFile(String path, String fileName, Map<String, String> names,
+			Map<String, Long> sales) {
 		//※ここに書き込み処理を作成してください。(処理内容3-1)
 		BufferedWriter bw = null;
 		try {
@@ -276,12 +274,12 @@ public class CalculateSales {
 			FileWriter fw = new FileWriter(file);
 			bw = new BufferedWriter(fw);
 
-			for (String key : Names.keySet()) {
+			for (String key : names.keySet()) {
 				//keyという変数には、Mapから取得したキーが代入されています。
 				//拡張for文で繰り返されているので、1つ目のキーが取得できたら、
 				//2つ目の取得...といったように、次々とkeyという変数に上書きされていきます。
 				String line;
-				bw.write(key + "," + Names.get(key) + "," + Sales.get(key));
+				bw.write(key + "," + names.get(key) + "," + sales.get(key));
 				bw.newLine();
 			}
 		} catch (IOException e) {
