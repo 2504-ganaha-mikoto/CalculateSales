@@ -158,7 +158,7 @@ public class CalculateSales {
 				long intValue = Long.parseLong(salseList.get(2));
 				//読み込んだ売上金額を加算します。brunchCodeは支店コード。commodityCodeは商品コード。
 				Long saleSum = branchSales.get(branchCode) + intValue;
-				Long commoritySaleSum = branchSales.get(branchCode) + intValue;
+				Long commoritySaleSum = commoditySalseAmount.get(commodityCode) + intValue;
 
 				//エラー処理2-2　売上⾦額の合計が10桁を超えたか確認
 				if (saleSum >= 10000000000L ||commoritySaleSum >= 10000000000L) {
@@ -169,7 +169,7 @@ public class CalculateSales {
 				//加算した売上金額をMapに追加します。branchCodeは支店コード。commodityCodeは商品コード。
 				//saleSumは加算した金額。
 				branchSales.put(branchCode, saleSum);
-				commoditySalseAmount.put(commodityCode, saleSum);
+				commoditySalseAmount.put(commodityCode, commoritySaleSum);
 
 			} catch (IOException e) {
 				System.out.println(UNKNOWN_ERROR);
@@ -278,7 +278,7 @@ public class CalculateSales {
 				//keyという変数には、Mapから取得したキーが代入されています。
 				//拡張for文で繰り返されているので、1つ目のキーが取得できたら、
 				//2つ目の取得...といったように、次々とkeyという変数に上書きされていきます。
-				String line;
+//				String line;
 				bw.write(key + "," + names.get(key) + "," + sales.get(key));
 				bw.newLine();
 			}
